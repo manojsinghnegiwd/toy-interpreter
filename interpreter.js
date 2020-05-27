@@ -71,20 +71,14 @@ class toyInterpreter {
                 combinedTokens.push(combination)
             }
 
-            // console.log(cursorPosition)
-
             if (isEmpty(tokens[cursorPosition])) {
                 cursorPosition++
             }
-
-            // console.log(cursorPosition)
 
             if (isOperator(tokens[cursorPosition])) {
                 combinedTokens.push(tokens[cursorPosition])
                 cursorPosition++
             }
-
-            // console.log(cursorPosition)
 
             if (isStringExpression(tokens[cursorPosition])) {
                 const combinedResult = combineString(tokens, cursorPosition)
