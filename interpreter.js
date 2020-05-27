@@ -1,20 +1,6 @@
+const { isChar, isEmpty, isOperator, isStringExpression } = require("./utils/check");
+
 const separator = ""
-
-const isChar = token => {
-    return !!/([a-z])/ig.exec(token)
-}
-
-const isEmpty = token => {
-    return !!/ /g.exec(token)
-}
-
-const isOperator = token => {
-    return !!/(\+|-|\*|\/|=|>|<|>=|<=|&|\||%|!|\^|\(|\))/ig.exec(token)
-}
-
-const isStringExpression = token => {
-    return !!/("|')/g.exec(token)
-}
 
 const combineString = (input, cursorPosition) => {
     let combination = '"'
@@ -93,9 +79,3 @@ class toyInterpreter {
 }
 
 module.exports = toyInterpreter
-
-// let x = "manoj singh"
-
-// char ["let", "x"]
-// operators ["="]
-// strings ['"manoj singh"']
