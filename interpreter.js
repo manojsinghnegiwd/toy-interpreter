@@ -1,4 +1,3 @@
-const util = require('util')
 const { isChar, isEmpty, isOperator, isStringExpression, isNumberExpression } = require("./utils/check");
 
 const isKeyword = input => ["let"].includes(input)
