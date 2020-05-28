@@ -21,7 +21,6 @@ class toyInterpreter {
 
     execute = () => {
         let position = 0
-
         while (position < this.programAst.body.length) {
             let currentObj = this.programAst.body[position]
             if (isKeyword(currentObj.value)) {
@@ -41,7 +40,6 @@ class toyInterpreter {
                 ast.push(result.result)
             }
         }
-
         return ast
     }
 
@@ -123,7 +121,6 @@ class toyInterpreter {
                 cursorPosition = combinedResult.cursorPosition
             }
         }
-
         return ast
     }
 }
