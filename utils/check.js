@@ -3,7 +3,7 @@ const isChar = token => {
 }
 
 const isEmpty = token => {
-    return !!/ /g.exec(token)
+    return !!/ /g.exec(token) || token == '\n'
 }
 
 const isOperator = token => {

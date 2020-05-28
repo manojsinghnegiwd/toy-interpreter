@@ -75,15 +75,32 @@ class toyInterpreter {
 
     programAst = {
         type: "Program",
+        scope: {},
         body: []
     }
 
     interpret = script => {
         const tokens = script.split(separator)
+        console.log(tokens)
         const rawAst = this.buildRawAst(tokens)
+        console.log(rawAst)
         const ast = this.buildProgramAst(rawAst)
 
-        console.log(ast)
+        this.programAst.body = ast
+
+        this.execute()
+    }
+
+    execute = () => {
+        let position = 0
+
+        while (position < this.programAst.body.length) {
+            let currentObj = this.programAst.body[position]
+            if (isKeyword(currentObj.value)) {
+                this.programAst.scope[currentObj.declaration.identifier.value] = currentObj.declaration.value.value
+                position++
+            }
+        }
     }
 
     buildProgramAst = rawAst => {
