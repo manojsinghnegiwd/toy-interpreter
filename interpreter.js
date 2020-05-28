@@ -1,11 +1,25 @@
 const util = require('util')
-const { isChar, isEmpty, isOperator, isStringExpression } = require("./utils/check");
+const { isChar, isEmpty, isOperator, isStringExpression, isNumberExpression } = require("./utils/check");
 
 const isKeyword = input => ["let"].includes(input)
 
-const isValidValue = token => ["string"].includes(token.type)
+const isValidValue = token => ["string", "number"].includes(token.type)
 
 const separator = ""
+
+const combineNumber = (input, cursorPosition) => {
+    let combination = ''
+
+    while (isNumberExpression(input[cursorPosition])) {
+        combination += input[cursorPosition]
+        cursorPosition++
+    }
+
+    return {
+        combination: parseInt(combination),
+        cursorPosition
+    }
+}
 
 const combineString = (input, cursorPosition) => {
     let combination = '"'
@@ -30,7 +44,7 @@ const combineString = (input, cursorPosition) => {
 }
 
 const combineChar = (input, cursorPosition) => {
-    let combination = []
+    let combination = ""
 
     while (isChar(input[cursorPosition])) {
         combination += input[cursorPosition]
@@ -81,9 +95,7 @@ class toyInterpreter {
 
     interpret = script => {
         const tokens = script.split(separator)
-        console.log(tokens)
         const rawAst = this.buildRawAst(tokens)
-        console.log(rawAst)
         const ast = this.buildProgramAst(rawAst)
 
         this.programAst.body = ast
@@ -122,6 +134,10 @@ class toyInterpreter {
         let cursorPosition = 0
 
         while (cursorPosition < tokens.length) {
+            if (isEmpty(tokens[cursorPosition])) {
+                cursorPosition++
+            }
+
             if (isChar(tokens[cursorPosition])) {
                 const combinedResult = combineChar(tokens, cursorPosition)
                 const combination = combinedResult.combination
@@ -148,10 +164,6 @@ class toyInterpreter {
                 cursorPosition = combinedResult.cursorPosition
             }
 
-            if (isEmpty(tokens[cursorPosition])) {
-                cursorPosition++
-            }
-
             if (isOperator(tokens[cursorPosition])) {
                 ast.push({
                     type: 'operator',
@@ -172,6 +184,21 @@ class toyInterpreter {
                     // remove starting and trailing quotes
                     value: combination.slice(1, combination.length - 1),
                     rawValue: combination,
+                    node: {
+                        start: cursorPosition,
+                        end: combinedResult.cursorPosition
+                    }
+                })
+                cursorPosition = combinedResult.cursorPosition
+            }
+
+            if (isNumberExpression(tokens[cursorPosition])) {
+                const combinedResult = combineNumber(tokens, cursorPosition)
+                const combination = combinedResult.combination
+                ast.push({
+                    type: 'number',
+                    // remove starting and trailing quotes
+                    value: combination,
                     node: {
                         start: cursorPosition,
                         end: combinedResult.cursorPosition
