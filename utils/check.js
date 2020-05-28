@@ -19,10 +19,16 @@ const isNumberExpression = (token = '') => {
     return !!/[0-9]*/g.exec(token)
 }
 
+const isKeyword = input => ["let"].includes(input)
+
+const isValidValue = token => ["string", "number"].includes(token.type)
+
 module.exports = {
     isChar,
     isEmpty,
     isOperator,
     isStringExpression,
-    isNumberExpression
+    isNumberExpression,
+    isKeyword,
+    isValidValue
 }

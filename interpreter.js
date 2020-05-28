@@ -1,88 +1,7 @@
-const { isChar, isEmpty, isOperator, isStringExpression, isNumberExpression } = require("./utils/check");
-
-const isKeyword = input => ["let"].includes(input)
-
-const isValidValue = token => ["string", "number"].includes(token.type)
-
-const separator = ""
-
-const combineNumber = (input, cursorPosition) => {
-    let combination = ''
-
-    while (isNumberExpression(input[cursorPosition])) {
-        combination += input[cursorPosition]
-        cursorPosition++
-    }
-
-    return {
-        combination: parseInt(combination),
-        cursorPosition
-    }
-}
-
-const combineString = (input, cursorPosition) => {
-    let combination = '"'
-
-    // skip starting quote
-    cursorPosition++
-
-    while (!isStringExpression(input[cursorPosition])) {
-        combination += input[cursorPosition]
-        cursorPosition++
-    }
-
-    combination += '"'
-
-    // skip ending quote
-    cursorPosition++
-
-    return {
-        combination,
-        cursorPosition
-    }
-}
-
-const combineChar = (input, cursorPosition) => {
-    let combination = ""
-
-    while (isChar(input[cursorPosition])) {
-        combination += input[cursorPosition]
-        cursorPosition++
-    }
-
-    return {
-        combination,
-        cursorPosition
-    }
-}
-
-const buildVariableDeclaration = (rawAst, position) => {
-    let result = {
-        ...rawAst[position],
-        declaration: {}
-    }
-
-    if (rawAst[position + 1].type === "variable") {
-        result.declaration["identifier"] = rawAst[position + 1]
-    } else {
-        throw `invalid use of ${declaration.identifier.value}`
-    }
-
-    if (rawAst[position + 2].type === "operator" && rawAst[position + 2].value === "=") {
-        if (isValidValue(rawAst[position + 3])) {
-            result.declaration["value"] = rawAst[position + 3]
-        } else {
-            throw `invalid value ${rawAst[position + 3].value}`
-        }
-    } else {
-        throw `expected = instead got this ${rawAst[position + 2].value}`
-    }
-
-    return {
-        result,
-        position: position + 4
-    }
-}
+const { isChar, isEmpty, isOperator, isStringExpression, isNumberExpression, isKeyword, isValidValue } = require("./utils/check");
+const { combineString, combineNumber, combineChar } = require("./utils/combine");
+const { buildVariableDeclaration } = require("./utils/buildTree")
+const { separator } = require('./utils/constants')
 
 class toyInterpreter {
 
@@ -96,9 +15,7 @@ class toyInterpreter {
         const tokens = script.split(separator)
         const rawAst = this.buildRawAst(tokens)
         const ast = this.buildProgramAst(rawAst)
-
         this.programAst.body = ast
-
         this.execute()
     }
 
