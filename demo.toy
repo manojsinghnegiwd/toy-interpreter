@@ -1,3 +1,7 @@
 let x = "manoj singh"
 let y = "manoj"
 let z = 456
+let n = 1
+let a = x
+let b = y
+let c = z

@@ -6,25 +6,34 @@ const buildVariableDeclaration = (rawAst, position) => {
         declaration: {}
     }
 
-    if (rawAst[position + 1].type === "variable") {
-        result.declaration["identifier"] = rawAst[position + 1]
+    position++
+
+    if (rawAst[position].type === "variable") {
+        result.declaration["identifier"] = rawAst[position]
     } else {
         throw `invalid use of ${declaration.identifier.value}`
     }
 
-    if (rawAst[position + 2].type === "operator" && rawAst[position + 2].value === "=") {
-        if (isValidValue(rawAst[position + 3])) {
-            result.declaration["value"] = rawAst[position + 3]
+    position++
+
+    if (rawAst[position].type === "operator" && rawAst[position].value === "=") {
+
+        position++
+
+        if (isValidValue(rawAst[position])) {
+            result.declaration["value"] = rawAst[position]
         } else {
-            throw `invalid value ${rawAst[position + 3].value}`
+            throw `invalid value ${rawAst[position].value}`
         }
     } else {
-        throw `expected = instead got this ${rawAst[position + 2].value}`
+        throw `expected = instead got this ${rawAst[position].value}`
     }
+
+    position++
 
     return {
         result,
-        position: position + 4
+        position
     }
 }
 

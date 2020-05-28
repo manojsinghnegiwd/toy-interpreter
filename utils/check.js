@@ -1,9 +1,14 @@
-const isChar = token => {
+const isChar = (token = '') => {
+    if (!token.trim()) return false
     return !!/([a-z])/ig.exec(token)
 }
 
 const isEmpty = token => {
-    return !!/ /g.exec(token) || token == '\n'
+    return !!/ /g.exec(token)
+}
+
+const isNewLine = token => {
+    return token == '\n'
 }
 
 const isOperator = (token) => {
@@ -21,7 +26,7 @@ const isNumberExpression = (token = '') => {
 
 const isKeyword = input => ["let"].includes(input)
 
-const isValidValue = token => ["string", "number"].includes(token.type)
+const isValidValue = token => ["string", "number", "variable"].includes(token.type)
 
 module.exports = {
     isChar,
@@ -30,5 +35,6 @@ module.exports = {
     isStringExpression,
     isNumberExpression,
     isKeyword,
-    isValidValue
+    isValidValue,
+    isNewLine
 }
