@@ -17,6 +17,7 @@ class toyInterpreter {
         const tokens = script.split(separator)
         const rawAst = this.buildRawAst(tokens)
         const ast = this.buildProgramAst(rawAst)
+        console.log(rawAst, 'rawAst')
         this.programAst.body = ast
         this.execute()
     }

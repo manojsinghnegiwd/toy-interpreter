@@ -20,8 +20,7 @@ const isStringExpression = token => {
 }
 
 const isNumberExpression = (token = '') => {
-    if (!token.trim()) return false
-    return !!/[0-9]*/g.exec(token)
+    return !!/[0-9]+/g.exec(token)
 }
 
 const isKeyword = input => ["let"].includes(input)
