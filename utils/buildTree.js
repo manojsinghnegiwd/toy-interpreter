@@ -1,3 +1,5 @@
+const { isValidValue } = require('./check')
+
 const buildVariableDeclaration = (rawAst, position) => {
     let result = {
         ...rawAst[position],

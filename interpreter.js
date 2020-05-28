@@ -1,4 +1,4 @@
-const { isChar, isEmpty, isOperator, isStringExpression, isNumberExpression, isKeyword, isValidValue } = require("./utils/check");
+const { isChar, isEmpty, isOperator, isStringExpression, isNumberExpression, isKeyword } = require("./utils/check");
 const { combineString, combineNumber, combineChar } = require("./utils/combine");
 const { buildVariableDeclaration } = require("./utils/buildTree")
 const { separator } = require('./utils/constants')
