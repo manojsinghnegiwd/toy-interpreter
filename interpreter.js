@@ -15,7 +15,9 @@ class toyInterpreter {
     interpret = script => {
         this.programAst.value = script
         const tokens = script.split(separator)
+        console.log(tokens, 'tokens')
         const rawAst = this.buildRawAst(tokens)
+        console.log(rawAst, 'rawAst')
         const ast = this.buildProgramAst(rawAst)
         console.log(rawAst, 'rawAst')
         this.programAst.body = ast
@@ -74,7 +76,7 @@ class toyInterpreter {
             if (isNewLine(tokens[cursorPosition])) {
                 ast.push({
                     type: 'newLine',
-                    value: "\n",
+                    value: tokens[cursorPosition],
                     node: {
                         start: cursorPosition,
                         end: cursorPosition + 1

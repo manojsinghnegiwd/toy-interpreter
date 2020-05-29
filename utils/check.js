@@ -4,11 +4,11 @@ const isChar = (token = '') => {
 }
 
 const isEmpty = token => {
-    return !!/ /g.exec(token)
+    return !!/ /g.exec(token) || !token
 }
 
 const isNewLine = token => {
-    return token == '\n'
+    return token == '\n' || token == '\r'
 }
 
 const isOperator = (token) => {
