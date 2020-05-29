@@ -1,6 +1,7 @@
 const { isChar, isEmpty, isOperator, isStringExpression, isNumberExpression, isKeyword, isNewLine } = require("./utils/check");
 const { combineString, combineNumber, combineChar } = require("./utils/combine");
 const { buildVariableDeclaration } = require("./utils/buildTree")
+const { evaluateValue } = require("./utils/evaluation")
 const { separator } = require('./utils/constants')
 
 class toyInterpreter {
@@ -15,23 +16,11 @@ class toyInterpreter {
     interpret = script => {
         this.programAst.value = script
         const tokens = script.split(separator)
-        console.log(tokens, 'tokens')
         const rawAst = this.buildRawAst(tokens)
         console.log(rawAst, 'rawAst')
         const ast = this.buildProgramAst(rawAst)
-        console.log(rawAst, 'rawAst')
         this.programAst.body = ast
         this.execute()
-    }
-
-    evaluateValue = token => {
-        switch (token.type) {
-            case 'string':
-            case 'number':
-                return token.value
-            case 'variable':
-                return this.programAst.scope[token.value]
-        }
     }
 
     execute = () => {
@@ -39,7 +28,7 @@ class toyInterpreter {
         while (position < this.programAst.body.length) {
             let currentObj = this.programAst.body[position]
             if (isKeyword(currentObj.value)) {
-                this.programAst.scope[currentObj.declaration.identifier.value] = this.evaluateValue(currentObj.declaration.value)
+                this.programAst.scope[currentObj.declaration.identifier.value] = evaluateValue(this.programAst.scope, currentObj.declaration.value)
                 position++
             } else {
                 position++
@@ -63,6 +52,9 @@ class toyInterpreter {
         }
         return ast
     }
+
+    // remove  /r
+    removeCarriageReturn = rawAst => rawAst.filter(token => token.value !== "\r") 
 
     buildRawAst = tokens => {
         const ast = []
@@ -154,7 +146,8 @@ class toyInterpreter {
                 cursorPosition = combinedResult.cursorPosition
             }
         }
-        return ast
+
+        return this.removeCarriageReturn(ast)
     }
 }
 
