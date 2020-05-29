@@ -6,3 +6,4 @@ let a=x
 let b=y
 let c=z
 let j=z + c
+let h = x + y
