@@ -25,6 +25,8 @@ const isNumberExpression = (token = '') => {
 
 const isKeyword = input => ["let"].includes(input)
 
+const isVariable = token => token.type == "variable"
+
 const isValidValue = token => ["string", "number", "variable"].includes(token.type)
 
 module.exports = {
@@ -35,5 +37,6 @@ module.exports = {
     isNumberExpression,
     isKeyword,
     isValidValue,
-    isNewLine
+    isNewLine,
+    isVariable
 }

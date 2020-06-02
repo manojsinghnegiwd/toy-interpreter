@@ -1,4 +1,4 @@
-const { isChar, isEmpty, isOperator, isStringExpression, isNumberExpression, isKeyword, isNewLine } = require("./utils/check");
+const { isChar, isEmpty, isOperator, isStringExpression, isNumberExpression, isKeyword, isNewLine, isVariable } = require("./utils/check");
 const { combineString, combineNumber, combineChar } = require("./utils/combine");
 const { buildVariableDeclaration } = require("./utils/buildTree")
 const { removeCarriageReturn, createToken } = require("./utils/helper")
@@ -27,7 +27,11 @@ class toyInterpreter {
         let currentObj = this.programAst.body[position]
 
         if (isKeyword(currentObj.value)) {
-            this.programAst.scope[currentObj.declaration.identifier.value] = evaluateValue(this.programAst.scope, currentObj.declaration.value)
+            if (!this.programAst.scope[currentObj.declaration.identifier.value]) {
+                this.programAst.scope[currentObj.declaration.identifier.value] = evaluateValue(this.programAst.scope, currentObj.declaration.value)
+            } else {
+                throw `you can't redefine ${currentObj.declaration.identifier.value}`
+            }
             position++
         } else {
             position++
@@ -43,6 +47,10 @@ class toyInterpreter {
 
         if (isKeyword(tokens[position].value)) {
             const result = buildVariableDeclaration(tokens, position)
+            position = result.position
+            ast.push(result.result)
+        } else if (isVariable(tokens[position])) {
+            const result = buildVariable(tokens, position)
             position = result.position
             ast.push(result.result)
         } else {

@@ -7,3 +7,5 @@ let b = y
 let c = z
 let j = z + c
 let h = x + y
+
+log(x)

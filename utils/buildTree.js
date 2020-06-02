@@ -26,6 +26,10 @@ const buildExpression = (rawAst, position) => {
     }
 }
 
+const buildVariable = () => {
+    
+}
+
 const buildVariableDeclaration = (rawAst, position) => {
     let result = {
         ...rawAst[position],
@@ -64,5 +68,6 @@ const buildVariableDeclaration = (rawAst, position) => {
 }
 
 module.exports = {
-    buildVariableDeclaration
+    buildVariableDeclaration,
+    buildVariable
 }
