@@ -1,7 +1,7 @@
 const { isChar, isEmpty, isOperator, isStringExpression, isNumberExpression, isKeyword, isNewLine } = require("./utils/check");
 const { combineString, combineNumber, combineChar } = require("./utils/combine");
 const { buildVariableDeclaration } = require("./utils/buildTree")
-const { removeCarriageReturn } = require("./utils/helper")
+const { removeCarriageReturn, createToken } = require("./utils/helper")
 const { evaluateValue } = require("./utils/evaluation")
 const { separator } = require('./utils/constants')
 
@@ -16,137 +16,98 @@ class toyInterpreter {
 
     interpret = script => {
         this.programAst.value = script
-        const tokens = script.split(separator)
-        const rawAst = this.buildRawAst(tokens)
-        console.log(rawAst, 'rawAst')
-        const ast = this.buildProgramAst(rawAst)
+        const characters = script.split(separator)
+        const tokens = this.buildTokens(characters)
+        const ast = this.buildProgramAst(tokens)
         this.programAst.body = ast
         this.execute()
     }
 
-    execute = () => {
-        let position = 0
-        while (position < this.programAst.body.length) {
-            let currentObj = this.programAst.body[position]
-            if (isKeyword(currentObj.value)) {
-                this.programAst.scope[currentObj.declaration.identifier.value] = evaluateValue(this.programAst.scope, currentObj.declaration.value)
-                position++
-            } else {
-                position++
-            }
+    execute = (position = 0) => {
+        let currentObj = this.programAst.body[position]
+
+        if (isKeyword(currentObj.value)) {
+            this.programAst.scope[currentObj.declaration.identifier.value] = evaluateValue(this.programAst.scope, currentObj.declaration.value)
+            position++
+        } else {
+            position++
         }
 
-        console.log(this.programAst.scope)
+        if (this.programAst.body[position]) {
+            return this.execute(position)
+        }
     }
 
-    buildProgramAst = rawAst => {
-        let position = 0
-        let ast = []
-        while (position < rawAst.length) {
-            if (isKeyword(rawAst[position].value)) {
-                const result = buildVariableDeclaration(rawAst, position)
-                position = result.position
-                ast.push(result.result)
-            } else {
-                position++
-            }
+    buildProgramAst = (tokens, position = 0, previousAst = []) => {
+        let ast = previousAst
+
+        if (isKeyword(tokens[position].value)) {
+            const result = buildVariableDeclaration(tokens, position)
+            position = result.position
+            ast.push(result.result)
+        } else {
+            position++
         }
+
+        if (tokens[position]) {
+            return this.buildProgramAst(tokens, position, ast)
+        }
+
         return ast
     }
 
-    buildRawAst = (tokens, cursorPosition = 0, previousAst = []) => {
-        const ast = previousAst
+    buildTokens = (characters, cursorPosition = 0, previousTokens = []) => {
+        const tokens = previousTokens
 
-        if (isEmpty(tokens[cursorPosition])) {
+        if (isEmpty(characters[cursorPosition])) {
             cursorPosition++
         }
 
-        if (isNewLine(tokens[cursorPosition])) {
-            ast.push({
-                type: 'newLine',
-                value: tokens[cursorPosition],
-                node: {
-                    start: cursorPosition,
-                    end: cursorPosition + 1
-                }
-            })
+        if (isNewLine(characters[cursorPosition])) {
+            tokens.push(createToken('newLine', characters[cursorPosition], cursorPosition, cursorPosition + 1))
             cursorPosition++
         }
 
-        if (isChar(tokens[cursorPosition])) {
-            const combinedResult = combineChar(tokens, cursorPosition)
+        if (isChar(characters[cursorPosition])) {
+            const combinedResult = combineChar(characters, cursorPosition)
             const combination = combinedResult.combination
+            let type = ""
+
             if (isKeyword(combination)) {
-                ast.push({
-                    type: 'keyword',
-                    value: combination,
-                    node: {
-                        start: cursorPosition,
-                        end: combinedResult.cursorPosition
-                    }
-                })
+                type = 'newLine'
             }
             if (!isKeyword(combination)) {
-                ast.push({
-                    type: 'variable',
-                    value: combination,
-                    node: {
-                        start: cursorPosition,
-                        end: combinedResult.cursorPosition
-                    }
-                })
+                type = 'variable'
             }
+
+            tokens.push(createToken('variable', combination, cursorPosition, combinedResult.cursorPosition))
             cursorPosition = combinedResult.cursorPosition
         }
 
-        if (isOperator(tokens[cursorPosition])) {
-            ast.push({
-                type: 'operator',
-                value: tokens[cursorPosition],
-                node: {
-                    start: cursorPosition,
-                    end: cursorPosition + 1
-                }
-            })
+        if (isOperator(characters[cursorPosition])) {
+            tokens.push(createToken('operator', characters[cursorPosition], cursorPosition, cursorPosition + 1))
             cursorPosition++
         }
 
-        if (isStringExpression(tokens[cursorPosition])) {
-            const combinedResult = combineString(tokens, cursorPosition)
+        if (isStringExpression(characters[cursorPosition])) {
+            const combinedResult = combineString(characters, cursorPosition)
             const combination = combinedResult.combination
-            ast.push({
-                type: 'string',
-                // remove starting and trailing quotes
-                value: combination.slice(1, combination.length - 1),
-                rawValue: combination,
-                node: {
-                    start: cursorPosition,
-                    end: combinedResult.cursorPosition
-                }
-            })
+            tokens.push(createToken('string', combination.slice(1, combination.length - 1), cursorPosition, combinedResult.cursorPosition, { rawValue: combination }))
             cursorPosition = combinedResult.cursorPosition
         }
 
-        if (isNumberExpression(tokens[cursorPosition])) {
-            const combinedResult = combineNumber(tokens, cursorPosition)
+        if (isNumberExpression(characters[cursorPosition])) {
+            const combinedResult = combineNumber(characters, cursorPosition)
             const combination = combinedResult.combination
-            ast.push({
-                type: 'number',
-                // remove starting and trailing quotes
-                value: combination,
-                node: {
-                    start: cursorPosition,
-                    end: combinedResult.cursorPosition
-                }
-            })
+            tokens.push(createToken('number', combination, cursorPosition, combinedResult.cursorPosition))
             cursorPosition = combinedResult.cursorPosition
         }
 
-        if (tokens[cursorPosition]) {
-            return this.buildRawAst(tokens, cursorPosition, ast)
+        if (characters[cursorPosition]) {
+            return this.buildTokens(characters, cursorPosition, tokens)
         }
 
-        return removeCarriageReturn(ast)
+        return removeCarriageReturn(tokens)
     }
 }
 
